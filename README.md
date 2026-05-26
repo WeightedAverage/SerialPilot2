@@ -25,7 +25,7 @@
 ## 项目结构
 
 ```
-test/
+SerialPilot2/
 ├── main.cpp                        # 入口
 └── project/
     ├── main_window.h/cpp           # 主窗口 UI + 业务逻辑
@@ -43,7 +43,7 @@ QT_DIR="E:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64"
 TOOLS_DIR="E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64"
 
 # 生成 Makefile
-"$QT_DIR/bin/qmake.exe" test/test.pro -spec win32-g++
+"$QT_DIR/bin/qmake.exe" SerialPilot2/SerialPilot2.pro -spec win32-g++
 
 # 编译
 "$TOOLS_DIR/bin/mingw32-make.exe" debug    # Debug 版本

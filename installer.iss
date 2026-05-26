@@ -10,16 +10,16 @@ Compression=lzma2
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
 SetupIconFile=
-UninstallDisplayIcon={app}\test.exe
+UninstallDisplayIcon={app}\SerialPilot2.exe
 PrivilegesRequired=lowest
 
 [Files]
 Source: "D:\studystudystudy\QT\package\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 
 [Icons]
-Name: "{group}\串口调试助手MAX"; Filename: "{app}\test.exe"
+Name: "{group}\串口调试助手MAX"; Filename: "{app}\SerialPilot2.exe"
 Name: "{group}\卸载串口调试助手MAX"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\串口调试助手MAX"; Filename: "{app}\test.exe"
+Name: "{commondesktop}\串口调试助手MAX"; Filename: "{app}\SerialPilot2.exe"
 
 [Run]
-Filename: "{app}\test.exe"; Description: "启动串口调试助手MAX"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\SerialPilot2.exe"; Description: "启动串口调试助手MAX"; Flags: postinstall nowait skipifsilent

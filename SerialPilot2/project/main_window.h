@@ -209,6 +209,7 @@ private:
     bool m_autoScroll1;
     bool m_autoScroll2;
     int m_fontSize;
+    int m_sendFontSize;
     QString m_fontFamily;
 
     // 颜色设置

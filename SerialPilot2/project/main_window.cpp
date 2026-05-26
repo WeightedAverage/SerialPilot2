@@ -8,6 +8,8 @@
 #include <QFontComboBox>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QPixmap>
+#include <QIcon>
 
 
 // 枚举映射表：combo index → Qt 枚举值
@@ -59,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_autoScroll1(false)
     , m_autoScroll2(false)
     , m_fontSize(12)
+    , m_sendFontSize(12)
     , m_fontFamily("Consolas")
     , m_recvColor("#00FF00")
     , m_sendColor("#FFD700")
@@ -313,54 +316,28 @@ void MainWindow::setupUi()
 
     createCollapseButton(tr("接收设置"), recvContent, false, leftLayout);
 
-    // 发送设置（可折叠）
-    QFrame *sendContent = new QFrame();
-    QFormLayout *sendLayout = new QFormLayout(sendContent);
-    sendLayout->setContentsMargins(0, 4, 0, 4);
-
+    // 发送设置控件（在系统设置对话框中使用）
     m_hexSendCheck = new QCheckBox(tr("HEX发送"));
-    sendLayout->addRow(m_hexSendCheck);
-
     m_autoSendCheck = new QCheckBox(tr("定时发送"));
-    sendLayout->addRow(m_autoSendCheck);
-
     m_autoSendIntervalSpin = new QSpinBox();
     m_autoSendIntervalSpin->setRange(10, 99999);
     m_autoSendIntervalSpin->setValue(1000);
-    sendLayout->addRow(tr("间隔(ms)"), m_autoSendIntervalSpin);
-
     m_newlineCombo = new QComboBox();
     m_newlineCombo->addItems({"CRLF", "LF", "CR", tr("无")});
-    sendLayout->addRow(tr("换行符"), m_newlineCombo);
 
-    createCollapseButton(tr("发送设置"), sendContent, true, leftLayout);
-
-    // 颜色设置（可折叠）
-    QFrame *colorContent = new QFrame();
-    QFormLayout *colorLayout = new QFormLayout(colorContent);
-    colorLayout->setContentsMargins(0, 4, 0, 4);
-
+    // 颜色设置控件（在系统设置对话框中使用）
     m_recvColorBtn = new QPushButton();
     m_recvColorBtn->setObjectName("colorBtn");
     m_recvColorBtn->setFixedSize(60, 26);
-    colorLayout->addRow(tr("接收文字"), m_recvColorBtn);
-
     m_sendColorBtn = new QPushButton();
     m_sendColorBtn->setObjectName("colorBtn");
     m_sendColorBtn->setFixedSize(60, 26);
-    colorLayout->addRow(tr("发送文字"), m_sendColorBtn);
-
     m_timestampColorBtn = new QPushButton();
     m_timestampColorBtn->setObjectName("colorBtn");
     m_timestampColorBtn->setFixedSize(60, 26);
-    colorLayout->addRow(tr("时间戳"), m_timestampColorBtn);
-
     m_bgColorBtn = new QPushButton();
     m_bgColorBtn->setObjectName("colorBtn");
     m_bgColorBtn->setFixedSize(60, 26);
-    colorLayout->addRow(tr("接收区背景"), m_bgColorBtn);
-
-    createCollapseButton(tr("颜色设置"), colorContent, true, leftLayout);
 
     // 关键字控件（在系统设置对话框中使用）
     m_keywordEdit = new QLineEdit();
@@ -498,7 +475,7 @@ void MainWindow::setupUi()
     QHBoxLayout *sendInputLayout = new QHBoxLayout();
     m_sendInput = new QTextEdit();
     m_sendInput->setMinimumHeight(60);
-    m_sendInput->setFont(QFont(m_fontFamily, m_fontSize));
+    m_sendInput->setFont(QFont(m_fontFamily, m_sendFontSize));
     m_sendInput->setPlaceholderText(tr("请输入要发送的内容... (Enter发送 | Shift+Enter换行)"));
     m_sendInput->installEventFilter(this);
     m_sendBtn = new QPushButton(tr("发送"));
@@ -1048,6 +1025,7 @@ void MainWindow::loadConfig()
         }
     }
     m_fontSize = config["font_size"].toInt(12);
+    m_sendFontSize = config["send_font_size"].toInt(m_fontSize);
     m_fontFamily = config["font_family"].toString("Consolas");
     QFont applyFont(m_fontFamily, m_fontSize);
     m_recvText1->setFont(applyFont);
@@ -1134,6 +1112,7 @@ void MainWindow::saveConfig()
     geo.append(height());
     config["window_geometry"] = geo;
     config["font_size"] = m_fontSize;
+    config["send_font_size"] = m_sendFontSize;
     config["font_family"] = m_fontFamily;
 
     // 颜色设置
@@ -1177,7 +1156,16 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 int delta = wheelEvent->angleDelta().y();
                 m_fontSize += (delta > 0) ? 1 : -1;
                 m_fontSize = qBound(6, m_fontSize, 36);
-                applyGlobalFont();
+                QFont f(m_fontFamily, m_fontSize);
+                m_recvText1->setFont(f);
+                m_recvText2->setFont(f);
+                return true;
+            }
+            if (obj == m_sendInput) {
+                int delta = wheelEvent->angleDelta().y();
+                m_sendFontSize += (delta > 0) ? 1 : -1;
+                m_sendFontSize = qBound(6, m_sendFontSize, 36);
+                m_sendInput->setFont(QFont(m_fontFamily, m_sendFontSize));
                 return true;
             }
         }
@@ -1644,11 +1632,12 @@ void MainWindow::onConnectionLost(int portNum)
 
 void MainWindow::applyGlobalFont()
 {
-    QFont f(m_fontFamily, m_fontSize);
-    setFont(f);
-    m_recvText1->setFont(f);
-    m_recvText2->setFont(f);
-    m_sendInput->setFont(f);
+    QFont recvFont(m_fontFamily, m_fontSize);
+    QFont sendFont(m_fontFamily, m_sendFontSize);
+    setFont(recvFont);
+    m_recvText1->setFont(recvFont);
+    m_recvText2->setFont(recvFont);
+    m_sendInput->setFont(sendFont);
     QFont titleFont("Microsoft YaHei UI", 14, QFont::DemiBold);
     m_titleLabel->setFont(titleFont);
 }
@@ -1663,6 +1652,15 @@ void MainWindow::setupTitleBar()
     QHBoxLayout *layout = new QHBoxLayout(m_titleBar);
     layout->setContentsMargins(12, 0, 8, 0);
     layout->setSpacing(4);
+
+    QPixmap logoPixmap(":/logo.png");
+    if (!logoPixmap.isNull()) {
+        setWindowIcon(QIcon(logoPixmap));
+        QLabel *logoLabel = new QLabel();
+        logoLabel->setPixmap(logoPixmap.scaled(22, 22, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        logoLabel->setFixedSize(26, 26);
+        layout->addWidget(logoLabel);
+    }
 
     m_titleLabel = new QLabel(tr("  加权平均数的串口调试助手 MAX"));
     m_titleLabel->setObjectName("titleLabel");
@@ -2018,6 +2016,8 @@ void MainWindow::showSettingsDialog()
     navList->setIconSize(QSize(18, 18));
     navList->addItem(tr("  字体设置"));
     navList->addItem(tr("  关键字高亮"));
+    navList->addItem(tr("  发送设置"));
+    navList->addItem(tr("  颜色设置"));
     navList->setCurrentRow(0);
     mainLayout->addWidget(navList);
 
@@ -2127,6 +2127,66 @@ void MainWindow::showSettingsDialog()
     kwPageLayout->addStretch();
     stack->addWidget(kwPage);
 
+    // --- 页面3: 发送设置 ---
+    QWidget *sendPage = new QWidget();
+    QVBoxLayout *sendPageLayout = new QVBoxLayout(sendPage);
+    sendPageLayout->setContentsMargins(30, 24, 30, 24);
+    sendPageLayout->setSpacing(16);
+
+    QLabel *sendTitle = new QLabel(tr("发送设置"));
+    sendTitle->setObjectName("pageTitle");
+    sendPageLayout->addWidget(sendTitle);
+
+    QLabel *sendDesc = new QLabel(tr("配置数据发送的格式和定时发送参数。"));
+    sendDesc->setWordWrap(true);
+    sendDesc->setStyleSheet("color: #999999; font-size: 12px;");
+    sendPageLayout->addWidget(sendDesc);
+
+    QFrame *sendSep = new QFrame();
+    sendSep->setFrameShape(QFrame::HLine);
+    sendSep->setStyleSheet("color: #333333;");
+    sendPageLayout->addWidget(sendSep);
+
+    QFormLayout *sendFormLayout = new QFormLayout();
+    sendFormLayout->setSpacing(12);
+    sendFormLayout->addRow(m_hexSendCheck);
+    sendFormLayout->addRow(m_autoSendCheck);
+    sendFormLayout->addRow(tr("间隔(ms)"), m_autoSendIntervalSpin);
+    sendFormLayout->addRow(tr("换行符"), m_newlineCombo);
+    sendPageLayout->addLayout(sendFormLayout);
+    sendPageLayout->addStretch();
+    stack->addWidget(sendPage);
+
+    // --- 页面4: 颜色设置 ---
+    QWidget *colorPage = new QWidget();
+    QVBoxLayout *colorPageLayout = new QVBoxLayout(colorPage);
+    colorPageLayout->setContentsMargins(30, 24, 30, 24);
+    colorPageLayout->setSpacing(16);
+
+    QLabel *colorTitle = new QLabel(tr("颜色设置"));
+    colorTitle->setObjectName("pageTitle");
+    colorPageLayout->addWidget(colorTitle);
+
+    QLabel *colorDesc = new QLabel(tr("自定义接收区和发送区的显示颜色。"));
+    colorDesc->setWordWrap(true);
+    colorDesc->setStyleSheet("color: #999999; font-size: 12px;");
+    colorPageLayout->addWidget(colorDesc);
+
+    QFrame *colorSep = new QFrame();
+    colorSep->setFrameShape(QFrame::HLine);
+    colorSep->setStyleSheet("color: #333333;");
+    colorPageLayout->addWidget(colorSep);
+
+    QFormLayout *colorFormLayout = new QFormLayout();
+    colorFormLayout->setSpacing(12);
+    colorFormLayout->addRow(tr("接收文字"), m_recvColorBtn);
+    colorFormLayout->addRow(tr("发送文字"), m_sendColorBtn);
+    colorFormLayout->addRow(tr("时间戳"), m_timestampColorBtn);
+    colorFormLayout->addRow(tr("接收区背景"), m_bgColorBtn);
+    colorPageLayout->addLayout(colorFormLayout);
+    colorPageLayout->addStretch();
+    stack->addWidget(colorPage);
+
     mainLayout->addWidget(stack);
 
     // 导航切换
@@ -2134,11 +2194,19 @@ void MainWindow::showSettingsDialog()
 
     dialog.exec();
 
-    // 对话框关闭后，将控件从对话框中脱离
+    // 对话框关闭后，将控件从对话框中脱离（防止被 Qt 自动删除）
     m_keywordEdit->setParent(nullptr);
     m_addKeywordBtn->setParent(nullptr);
     m_removeKeywordBtn->setParent(nullptr);
     m_keywordTable->setParent(nullptr);
+    m_hexSendCheck->setParent(nullptr);
+    m_autoSendCheck->setParent(nullptr);
+    m_autoSendIntervalSpin->setParent(nullptr);
+    m_newlineCombo->setParent(nullptr);
+    m_recvColorBtn->setParent(nullptr);
+    m_sendColorBtn->setParent(nullptr);
+    m_timestampColorBtn->setParent(nullptr);
+    m_bgColorBtn->setParent(nullptr);
 }
 
 void MainWindow::createCollapseButton(const QString &title, QFrame *content, bool collapsed, QVBoxLayout *parentLayout)

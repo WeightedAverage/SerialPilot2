@@ -2,6 +2,7 @@ QT       += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+TARGET = SerialPilot2
 CONFIG += c++11
 win32: LIBS += -ldwmapi
 
@@ -22,8 +23,11 @@ HEADERS += \
 
 FORMS +=
 
+RESOURCES += \
+    resources.qrc
+
 TRANSLATIONS += \
-    test_zh_CN.ts
+    SerialPilot2_zh_CN.ts
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
