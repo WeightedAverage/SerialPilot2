@@ -20,6 +20,7 @@
 #include <QFrame>
 #include <QVBoxLayout>
 #include <QTableWidget>
+#include <QDialog>
 
 class SerialManager;
 class KeywordHighlighter;
@@ -99,6 +100,7 @@ private:
     void createCollapseButton(const QString &title, QFrame *content, bool collapsed, QVBoxLayout *parentLayout);
     void applyGlobalFont();
     void connectToPort(int portNum);
+    void showSettingsDialog();
     void setupTitleBar();
     void toggleMaximize();
     void minimizeWindow();

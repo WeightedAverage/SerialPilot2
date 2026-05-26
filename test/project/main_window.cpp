@@ -172,25 +172,10 @@ void MainWindow::setupUi()
     leftLayout->setSpacing(6);
 
     // 系统设置
-    QFrame *sysContent = new QFrame();
-    QFormLayout *sysLayout = new QFormLayout(sysContent);
-    QPushButton *fontBtn = new QPushButton(tr("字体设置"));
-    fontBtn->setObjectName("fontBtn");
-    connect(fontBtn, &QPushButton::clicked, this, [this]() {
-        bool ok;
-        QFont currentFont(m_fontFamily, m_fontSize);
-        QFont font = QFontDialog::getFont(&ok, currentFont, this, tr("选择字体"),
-            QFontDialog::DontUseNativeDialog);
-        if (ok) {
-            m_fontSize = font.pointSize();
-            m_fontFamily = font.family();
-            applyGlobalFont();
-            AppLogger::instance().info(tr("字体已更改: %1 %2号").arg(m_fontFamily).arg(m_fontSize));
-            saveConfig();
-        }
-    });
-    sysLayout->addRow(tr("接收区字体:"), fontBtn);
-    createCollapseButton(tr("系统设置"), sysContent, true, leftLayout);
+    QPushButton *sysBtn = new QPushButton(tr("系统设置"));
+    sysBtn->setObjectName("fontBtn");
+    connect(sysBtn, &QPushButton::clicked, this, &MainWindow::showSettingsDialog);
+    leftLayout->addWidget(sysBtn);
 
     // 串口1设置
     QGroupBox *portGroup1 = new QGroupBox(tr("串口1设置"));
@@ -377,12 +362,7 @@ void MainWindow::setupUi()
 
     createCollapseButton(tr("颜色设置"), colorContent, true, leftLayout);
 
-    // 关键字高亮（可折叠）
-    QFrame *keywordContent = new QFrame();
-    QVBoxLayout *kwLayout = new QVBoxLayout(keywordContent);
-    kwLayout->setContentsMargins(0, 4, 0, 4);
-
-    QHBoxLayout *kwInputLayout = new QHBoxLayout();
+    // 关键字控件（在系统设置对话框中使用）
     m_keywordEdit = new QLineEdit();
     m_keywordEdit->setPlaceholderText(tr("输入关键字"));
     m_addKeywordBtn = new QPushButton(tr("+"));
@@ -391,20 +371,12 @@ void MainWindow::setupUi()
     m_removeKeywordBtn = new QPushButton(tr("-"));
     m_removeKeywordBtn->setObjectName("toolbarBtn");
     m_removeKeywordBtn->setFixedSize(30, 26);
-    kwInputLayout->addWidget(m_keywordEdit);
-    kwInputLayout->addWidget(m_addKeywordBtn);
-    kwInputLayout->addWidget(m_removeKeywordBtn);
-    kwLayout->addLayout(kwInputLayout);
-
     m_keywordTable = new QTableWidget(0, 2);
     m_keywordTable->setHorizontalHeaderLabels({tr("关键字"), tr("颜色")});
     m_keywordTable->horizontalHeader()->setStretchLastSection(true);
     m_keywordTable->setMaximumHeight(150);
     m_keywordTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_keywordTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    kwLayout->addWidget(m_keywordTable);
-
-    createCollapseButton(tr("关键字高亮"), keywordContent, true, leftLayout);
 
     leftLayout->addStretch();
 
@@ -1976,6 +1948,110 @@ void MainWindow::updateConnectButton(int portNum, bool connected)
         btn->setStyleSheet("");
         statusLabel->setStyleSheet("color: #888888;");
     }
+}
+
+void MainWindow::showSettingsDialog()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("系统设置"));
+    dialog.setMinimumSize(520, 600);
+    dialog.setStyleSheet(R"(
+        QDialog { background-color: #1E1E1E; color: #D0D0D0; }
+        QGroupBox {
+            background-color: #252526; color: #CCCCCC;
+            border: 1px solid #333333; border-radius: 6px;
+            padding: 14px 10px 8px 10px; font-size: 13px; font-weight: bold; margin-top: 14px;
+        }
+        QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 6px; color: #569CD6; }
+        QPushButton {
+            background-color: #0E639C; color: #FFFFFF; border: none; border-radius: 4px;
+            padding: 8px 18px; font-size: 13px; font-weight: bold;
+        }
+        QPushButton:hover { background-color: #1177BB; }
+        QPushButton:pressed { background-color: #094771; }
+        #fontBtn { background-color: #4EC9B0; color: #FFFFFF; }
+        #fontBtn:hover { background-color: #6EDDC5; }
+        #toolbarBtn { background-color: #2D5F8A; padding: 4px 10px; }
+        #toolbarBtn:hover { background-color: #3A7AB0; }
+        QLineEdit, QSpinBox {
+            background-color: #333333; color: #D0D0D0;
+            border: 1px solid #444444; border-radius: 4px; padding: 6px;
+        }
+        QLineEdit:focus, QSpinBox:focus { border: 1px solid #0E639C; }
+        QLabel { color: #D0D0D0; background: transparent; }
+        QTableWidget {
+            background-color: #1E1E1E; color: #D0D0D0;
+            border: 1px solid #333333; border-radius: 4px;
+            gridline-color: #2D2D2D; selection-background-color: #094771;
+        }
+        QHeaderView::section {
+            background-color: #2D2D2D; color: #D0D0D0;
+            border: 1px solid #333333; padding: 4px; font-weight: bold;
+        }
+        QScrollBar:vertical { background-color: #1E1E1E; width: 8px; border: none; }
+        QScrollBar::handle:vertical { background-color: #444444; border-radius: 4px; min-height: 20px; }
+        QScrollBar::handle:vertical:hover { background-color: #0E639C; }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+    )");
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+    mainLayout->setSpacing(12);
+
+    // === 字体设置 ===
+    QGroupBox *fontGroup = new QGroupBox(tr("字体设置"));
+    QFormLayout *fontLayout = new QFormLayout(fontGroup);
+    QLabel *fontInfoLabel = new QLabel(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
+    fontInfoLabel->setObjectName("fontInfoLabel");
+    QPushButton *fontBtn = new QPushButton(tr("选择字体"));
+    fontBtn->setObjectName("fontBtn");
+    connect(fontBtn, &QPushButton::clicked, this, [this, &fontInfoLabel]() {
+        bool ok;
+        QFont currentFont(m_fontFamily, m_fontSize);
+        QFont font = QFontDialog::getFont(&ok, currentFont, this, tr("选择字体"),
+            QFontDialog::DontUseNativeDialog);
+        if (ok) {
+            m_fontSize = font.pointSize();
+            m_fontFamily = font.family();
+            fontInfoLabel->setText(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
+            applyGlobalFont();
+            AppLogger::instance().info(tr("字体已更改: %1 %2号").arg(m_fontFamily).arg(m_fontSize));
+            saveConfig();
+        }
+    });
+    fontLayout->addRow(tr("当前字体:"), fontInfoLabel);
+    fontLayout->addRow(tr("操作:"), fontBtn);
+    mainLayout->addWidget(fontGroup);
+
+    // === 关键字高亮 ===
+    QGroupBox *kwGroup = new QGroupBox(tr("关键字高亮"));
+    QVBoxLayout *kwLayout = new QVBoxLayout(kwGroup);
+
+    QHBoxLayout *kwInputLayout = new QHBoxLayout();
+    kwInputLayout->addWidget(m_keywordEdit);
+    kwInputLayout->addWidget(m_addKeywordBtn);
+    kwInputLayout->addWidget(m_removeKeywordBtn);
+    kwLayout->addLayout(kwInputLayout);
+    kwLayout->addWidget(m_keywordTable);
+
+    mainLayout->addWidget(kwGroup);
+
+    // 关闭按钮
+    QHBoxLayout *closeLayout = new QHBoxLayout();
+    closeLayout->addStretch();
+    QPushButton *closeBtn = new QPushButton(tr("关闭"));
+    closeBtn->setFixedWidth(100);
+    connect(closeBtn, &QPushButton::clicked, &dialog, &QDialog::accept);
+    closeLayout->addWidget(closeBtn);
+    closeLayout->addStretch();
+    mainLayout->addLayout(closeLayout);
+
+    dialog.exec();
+
+    // 对话框关闭后，将控件从对话框中脱离
+    m_keywordEdit->setParent(nullptr);
+    m_addKeywordBtn->setParent(nullptr);
+    m_removeKeywordBtn->setParent(nullptr);
+    m_keywordTable->setParent(nullptr);
 }
 
 void MainWindow::createCollapseButton(const QString &title, QFrame *content, bool collapsed, QVBoxLayout *parentLayout)
