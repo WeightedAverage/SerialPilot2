@@ -5,6 +5,8 @@
 #include <QSerialPort>
 #include <QColorDialog>
 #include <QHeaderView>
+#include <QScreen>
+#include <QGuiApplication>
 
 
 // 枚举映射表：combo index → Qt 枚举值
@@ -70,7 +72,14 @@ MainWindow::MainWindow(QWidget *parent)
     , m_dragPos()
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    setMinimumSize(1500, 950);
+    QScreen *screen = QGuiApplication::primaryScreen();
+    if (screen) {
+        QRect geo = screen->availableGeometry();
+        resize(static_cast<int>(geo.width() * 0.8), static_cast<int>(geo.height() * 0.8));
+        setMinimumSize(1200, 800);
+    } else {
+        setMinimumSize(1500, 950);
+    }
 
     setupTitleBar();
     setupUi();
@@ -161,6 +170,27 @@ void MainWindow::setupUi()
     QWidget *leftPanel = new QWidget();
     QVBoxLayout *leftLayout = new QVBoxLayout(leftPanel);
     leftLayout->setSpacing(6);
+
+    // 系统设置
+    QFrame *sysContent = new QFrame();
+    QFormLayout *sysLayout = new QFormLayout(sysContent);
+    QPushButton *fontBtn = new QPushButton(tr("字体设置"));
+    fontBtn->setObjectName("fontBtn");
+    connect(fontBtn, &QPushButton::clicked, this, [this]() {
+        bool ok;
+        QFont currentFont(m_fontFamily, m_fontSize);
+        QFont font = QFontDialog::getFont(&ok, currentFont, this, tr("选择字体"),
+            QFontDialog::DontUseNativeDialog);
+        if (ok) {
+            m_fontSize = font.pointSize();
+            m_fontFamily = font.family();
+            applyGlobalFont();
+            AppLogger::instance().info(tr("字体已更改: %1 %2号").arg(m_fontFamily).arg(m_fontSize));
+            saveConfig();
+        }
+    });
+    sysLayout->addRow(tr("接收区字体:"), fontBtn);
+    createCollapseButton(tr("系统设置"), sysContent, true, leftLayout);
 
     // 串口1设置
     QGroupBox *portGroup1 = new QGroupBox(tr("串口1设置"));
@@ -319,24 +349,6 @@ void MainWindow::setupUi()
     sendLayout->addRow(tr("换行符"), m_newlineCombo);
 
     createCollapseButton(tr("发送设置"), sendContent, true, leftLayout);
-
-    // 字体设置
-    QPushButton *fontBtn = new QPushButton(tr("字体设置"));
-    fontBtn->setObjectName("fontBtn");
-    connect(fontBtn, &QPushButton::clicked, this, [this]() {
-        bool ok;
-        QFont currentFont(m_fontFamily, m_fontSize);
-        QFont font = QFontDialog::getFont(&ok, currentFont, this, tr("选择字体"),
-            QFontDialog::DontUseNativeDialog);
-        if (ok) {
-            m_fontSize = font.pointSize();
-            m_fontFamily = font.family();
-            applyGlobalFont();
-            AppLogger::instance().info(tr("字体已更改: %1 %2号").arg(m_fontFamily).arg(m_fontSize));
-            saveConfig();
-        }
-    });
-    leftLayout->addWidget(fontBtn);
 
     // 颜色设置（可折叠）
     QFrame *colorContent = new QFrame();
@@ -525,7 +537,7 @@ void MainWindow::setupUi()
     sendMainLayout->addLayout(sendInputLayout);
 
     QLabel *sendHint = new QLabel(tr("↑ Enter 发送 | Shift+Enter 换行"));
-    sendHint->setStyleSheet("color: #888888; font-size: 11px;");
+    sendHint->setStyleSheet("color: #BBBBBB; font-size: 11px;");
     sendMainLayout->addWidget(sendHint);
 
     m_vSplitter->addWidget(sendGroupBox);
