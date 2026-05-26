@@ -5,6 +5,7 @@
 #include <QSerialPort>
 #include <QColorDialog>
 #include <QHeaderView>
+#include <QFontComboBox>
 #include <QScreen>
 #include <QGuiApplication>
 
@@ -41,7 +42,6 @@ static const QSerialPort::FlowControl FLOW_CTRL_MAP[] = {
 #include <QStandardPaths>
 #include <QApplication>
 #include <QDateTime>
-#include <QFontDialog>
 #include <QDir>
 #include <QFile>
 #include <QTextCodec>
@@ -2045,28 +2045,56 @@ void MainWindow::showSettingsDialog()
     fontSep->setStyleSheet("color: #333333;");
     fontPageLayout->addWidget(fontSep);
 
-    QLabel *fontInfoLabel = new QLabel(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
-    fontInfoLabel->setStyleSheet("font-size: 14px; padding: 8px 0;");
-    fontPageLayout->addWidget(fontInfoLabel);
+    // 字体族选择
+    QLabel *familyLabel = new QLabel(tr("字体:"));
+    familyLabel->setStyleSheet("font-size: 13px; color: #CCCCCC;");
+    fontPageLayout->addWidget(familyLabel);
 
-    QPushButton *fontBtn = new QPushButton(tr("更改字体"));
-    fontBtn->setObjectName("fontBtn");
-    fontBtn->setFixedWidth(120);
-    connect(fontBtn, &QPushButton::clicked, this, [this, &fontInfoLabel]() {
-        bool ok;
-        QFont currentFont(m_fontFamily, m_fontSize);
-        QFont font = QFontDialog::getFont(&ok, currentFont, this, tr("选择字体"),
-            QFontDialog::DontUseNativeDialog);
-        if (ok) {
-            m_fontSize = font.pointSize();
-            m_fontFamily = font.family();
-            fontInfoLabel->setText(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
-            applyGlobalFont();
-            AppLogger::instance().info(tr("字体已更改: %1 %2号").arg(m_fontFamily).arg(m_fontSize));
-            saveConfig();
-        }
+    QFontComboBox *fontCombo = new QFontComboBox();
+    fontCombo->setCurrentFont(QFont(m_fontFamily));
+    fontCombo->setStyleSheet(R"(
+        QFontComboBox { background-color: #333333; color: #D0D0D0; border: 1px solid #444444; border-radius: 4px; padding: 6px; font-size: 13px; }
+        QFontComboBox:hover { border: 1px solid #555555; }
+        QFontComboBox::drop-down { border: none; width: 20px; }
+        QFontComboBox QAbstractItemView { background-color: #2D2D2D; color: #D0D0D0; border: 1px solid #444444; selection-background-color: #094771; }
+    )");
+    fontPageLayout->addWidget(fontCombo);
+
+    // 字号选择
+    QLabel *sizeLabel = new QLabel(tr("字号:"));
+    sizeLabel->setStyleSheet("font-size: 13px; color: #CCCCCC; margin-top: 8px;");
+    fontPageLayout->addWidget(sizeLabel);
+
+    QSpinBox *sizeSpin = new QSpinBox();
+    sizeSpin->setRange(6, 36);
+    sizeSpin->setValue(m_fontSize);
+    sizeSpin->setFixedWidth(100);
+    sizeSpin->setStyleSheet(R"(
+        QSpinBox { background-color: #333333; color: #D0D0D0; border: 1px solid #444444; border-radius: 4px; padding: 6px; font-size: 13px; }
+        QSpinBox:focus { border: 1px solid #0E639C; }
+    )");
+    fontPageLayout->addWidget(sizeSpin);
+
+    // 实时预览
+    QLabel *previewLabel = new QLabel(tr("效果预览 AaBbCc 0123"));
+    previewLabel->setStyleSheet("font-size: 14px; padding: 12px; background-color: #252526; border: 1px solid #333333; border-radius: 6px; margin-top: 8px;");
+    previewLabel->setFont(QFont(m_fontFamily, m_fontSize));
+    fontPageLayout->addWidget(previewLabel);
+
+    // 实时应用
+    connect(fontCombo, &QFontComboBox::currentFontChanged, this, [this, sizeSpin, previewLabel](const QFont &f) {
+        m_fontFamily = f.family();
+        previewLabel->setFont(QFont(m_fontFamily, sizeSpin->value()));
+        applyGlobalFont();
+        saveConfig();
     });
-    fontPageLayout->addWidget(fontBtn);
+    connect(sizeSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, [this, fontCombo, previewLabel](int size) {
+        m_fontSize = size;
+        previewLabel->setFont(QFont(fontCombo->currentFont().family(), size));
+        applyGlobalFont();
+        saveConfig();
+    });
+
     fontPageLayout->addStretch();
     stack->addWidget(fontPage);
 
