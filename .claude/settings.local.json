@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(qmake test.pro)",
+      "Read(//c/Qt/Qt5.14.2/5.14.2/mingw73_64/bin/**)",
+      "Read(//c/Qt/5.14.2/mingw73_64/bin/**)",
+      "Read(//c//**)",
+      "Bash(\"E:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/bin/qmake.exe\" ../test/test.pro -spec win32-g++)",
+      "Bash(\"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/mingw32-make.exe\")",
+      "Bash(\"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/mingw32-make.exe\" debug *)",
+      "Bash(export PATH=\"E:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/bin:E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin:$PATH\")",
+      "Bash(\"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/mingw32-make.exe\" clean *)",
+      "Bash(\"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/g++.exe\" -fsyntax-only -std=gnu++11 -IE:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/include -IE:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/include/QtWidgets -IE:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/include/QtGui -IE:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/include/QtSerialPort -IE:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/include/QtCore project/main_window.cpp)",
+      "Bash(E:/Esoft/QT/Qt5.14.2/5.14.2/mingw73_64/bin/windeployqt.exe *)",
+      "Bash(cp \"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/libgcc_s_seh-1.dll\" \"D:/studystudystudy/QT/package/\")",
+      "Bash(cp \"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/libstdc++-6.dll\" \"D:/studystudystudy/QT/package/\")",
+      "Bash(cp \"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/libwinpthread-1.dll\" \"D:/studystudystudy/QT/package/\")",
+      "Bash(cp -r \"D:/studystudystudy/QT/test/main.cpp\" \"D:/studystudystudy/项目/软件/串口调试助手/\")",
+      "Bash(cp -r \"D:/studystudystudy/QT/test/test.pro\" \"D:/studystudystudy/项目/软件/串口调试助手/\")",
+      "Bash(cp -r \"D:/studystudystudy/QT/test/project\" \"D:/studystudystudy/项目/软件/串口调试助手/\")",
+      "Bash(cp \"D:/studystudystudy/QT/test/test.pro.user\" \"D:/studystudystudy/项目/软件/串口调试助手/\")",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(\"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/mingw32-make.exe\" -f Makefile.Debug)",
+      "Bash(export PATH=\"E:/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin:$PATH\")",
+      "Read(//e/Esoft/QT/Qt5.14.2/Tools/mingw730_64/bin/**)",
+      "Bash(cmd.exe /c \"set PATH=E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin;%PATH% && cd /d D:\\\\studystudystudy\\\\QT\\\\SerialPilot\\\\build-test-Desktop_Qt_5_14_2_MinGW_64_bit-Debug && E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin\\\\mingw32-make.exe -f Makefile.Debug\")",
+      "Bash(cmd.exe *)",
+      "Bash(powershell.exe -Command '& { $env:PATH = '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin;'\\\\'' + $env:PATH; Set-Location '\\\\''D:\\\\studystudystudy\\\\QT\\\\SerialPilot\\\\build-test-Desktop_Qt_5_14_2_MinGW_64_bit-Debug'\\\\''; & '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin\\\\mingw32-make.exe'\\\\'' -f Makefile.Debug 2>&1 }')",
+      "Bash(powershell.exe -Command '& { $env:PATH = '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin;'\\\\'' + $env:PATH; Set-Location '\\\\''D:\\\\studystudystudy\\\\QT\\\\SerialPilot\\\\build-test-Desktop_Qt_5_14_2_MinGW_64_bit-Debug'\\\\''; & '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\5.14.2\\\\mingw73_64\\\\bin\\\\qmake.exe'\\\\'' ../test/test.pro -spec win32-g++ 2>&1; & '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin\\\\mingw32-make.exe'\\\\'' -f Makefile.Debug 2>&1 }')",
+      "Bash(powershell.exe -Command '& { $env:PATH = '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin;'\\\\'' + $env:PATH; Set-Location '\\\\''D:\\\\studystudystudy\\\\QT\\\\SerialPilot\\\\build-test-Desktop_Qt_5_14_2_MinGW_64_bit-Debug'\\\\''; & '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin\\\\mingw32-make.exe'\\\\'' clean 2>&1; & '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin\\\\mingw32-make.exe'\\\\'' -f Makefile.Debug 2>&1 }')",
+      "Bash(powershell.exe -Command '& { $env:PATH = '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin;'\\\\'' + $env:PATH; Set-Location '\\\\''D:\\\\studystudystudy\\\\QT\\\\SerialPilot\\\\build-test-Desktop_Qt_5_14_2_MinGW_64_bit-Debug'\\\\''; & '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin\\\\mingw32-make.exe'\\\\'' clean 2>&1 | Out-Null; & '\\\\''E:\\\\Esoft\\\\QT\\\\Qt5.14.2\\\\Tools\\\\mingw730_64\\\\bin\\\\mingw32-make.exe'\\\\'' -f Makefile.Debug 2>&1 }、')",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}
