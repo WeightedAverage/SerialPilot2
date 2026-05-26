@@ -23,6 +23,7 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QStackedWidget>
+#include <QFontComboBox>
 
 class SerialManager;
 class KeywordHighlighter;
