@@ -21,6 +21,8 @@
 #include <QVBoxLayout>
 #include <QTableWidget>
 #include <QDialog>
+#include <QListWidget>
+#include <QStackedWidget>
 
 class SerialManager;
 class KeywordHighlighter;

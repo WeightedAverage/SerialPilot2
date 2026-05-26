@@ -1954,7 +1954,7 @@ void MainWindow::showSettingsDialog()
 {
     QDialog dialog(this);
     dialog.setWindowTitle(tr("系统设置"));
-    dialog.setMinimumSize(520, 600);
+    dialog.setMinimumSize(750, 550);
     dialog.setStyleSheet(R"(
         QDialog { background-color: #1E1E1E; color: #D0D0D0; }
         QGroupBox {
@@ -1973,6 +1973,19 @@ void MainWindow::showSettingsDialog()
         #fontBtn:hover { background-color: #6EDDC5; }
         #toolbarBtn { background-color: #2D5F8A; padding: 4px 10px; }
         #toolbarBtn:hover { background-color: #3A7AB0; }
+        #navList {
+            background-color: #252526; border: none; border-radius: 8px;
+            outline: none; padding: 6px;
+        }
+        #navList::item {
+            padding: 12px 16px; border-radius: 6px; margin: 2px 4px;
+            color: #CCCCCC; font-size: 13px;
+        }
+        #navList::item:hover { background-color: #2D2D2D; }
+        #navList::item:selected {
+            background-color: #0E639C; color: #FFFFFF; font-weight: bold;
+        }
+        #pageTitle { font-size: 18px; font-weight: bold; color: #FFFFFF; }
         QLineEdit, QSpinBox {
             background-color: #333333; color: #D0D0D0;
             border: 1px solid #444444; border-radius: 4px; padding: 6px;
@@ -1994,14 +2007,48 @@ void MainWindow::showSettingsDialog()
         QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
     )");
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
-    mainLayout->setSpacing(12);
+    QHBoxLayout *mainLayout = new QHBoxLayout(&dialog);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    // === 字体设置 ===
-    QGroupBox *fontGroup = new QGroupBox(tr("字体设置"));
+    // === 左侧导航栏 ===
+    QListWidget *navList = new QListWidget();
+    navList->setObjectName("navList");
+    navList->setFixedWidth(180);
+    navList->setIconSize(QSize(18, 18));
+    navList->addItem(tr("  字体设置"));
+    navList->addItem(tr("  关键字高亮"));
+    navList->setCurrentRow(0);
+    mainLayout->addWidget(navList);
+
+    // === 右侧内容区 ===
+    QStackedWidget *stack = new QStackedWidget();
+    stack->setStyleSheet("QStackedWidget { background-color: #1E1E1E; }");
+
+    // --- 页面1: 字体设置 ---
+    QWidget *fontPage = new QWidget();
+    QVBoxLayout *fontPageLayout = new QVBoxLayout(fontPage);
+    fontPageLayout->setContentsMargins(30, 24, 30, 24);
+    fontPageLayout->setSpacing(16);
+
+    QLabel *fontTitle = new QLabel(tr("字体设置"));
+    fontTitle->setObjectName("pageTitle");
+    fontPageLayout->addWidget(fontTitle);
+
+    QLabel *fontDesc = new QLabel(tr("设置接收区和发送区的字体样式和大小。也可使用 Ctrl+滚轮 直接缩放。"));
+    fontDesc->setWordWrap(true);
+    fontDesc->setStyleSheet("color: #999999; font-size: 12px;");
+    fontPageLayout->addWidget(fontDesc);
+
+    QFrame *fontSep = new QFrame();
+    fontSep->setFrameShape(QFrame::HLine);
+    fontSep->setStyleSheet("color: #333333;");
+    fontPageLayout->addWidget(fontSep);
+
+    QGroupBox *fontGroup = new QGroupBox(tr("字体"));
     QFormLayout *fontLayout = new QFormLayout(fontGroup);
     QLabel *fontInfoLabel = new QLabel(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
-    fontInfoLabel->setObjectName("fontInfoLabel");
+    fontInfoLabel->setStyleSheet("font-size: 14px;");
     QPushButton *fontBtn = new QPushButton(tr("选择字体"));
     fontBtn->setObjectName("fontBtn");
     connect(fontBtn, &QPushButton::clicked, this, [this, &fontInfoLabel]() {
@@ -2020,30 +2067,46 @@ void MainWindow::showSettingsDialog()
     });
     fontLayout->addRow(tr("当前字体:"), fontInfoLabel);
     fontLayout->addRow(tr("操作:"), fontBtn);
-    mainLayout->addWidget(fontGroup);
+    fontPageLayout->addWidget(fontGroup);
+    fontPageLayout->addStretch();
+    stack->addWidget(fontPage);
 
-    // === 关键字高亮 ===
-    QGroupBox *kwGroup = new QGroupBox(tr("关键字高亮"));
+    // --- 页面2: 关键字高亮 ---
+    QWidget *kwPage = new QWidget();
+    QVBoxLayout *kwPageLayout = new QVBoxLayout(kwPage);
+    kwPageLayout->setContentsMargins(30, 24, 30, 24);
+    kwPageLayout->setSpacing(16);
+
+    QLabel *kwTitle = new QLabel(tr("关键字高亮"));
+    kwTitle->setObjectName("pageTitle");
+    kwPageLayout->addWidget(kwTitle);
+
+    QLabel *kwDesc = new QLabel(tr("添加关键字后，接收区中匹配的文本会以指定颜色高亮显示。"));
+    kwDesc->setWordWrap(true);
+    kwDesc->setStyleSheet("color: #999999; font-size: 12px;");
+    kwPageLayout->addWidget(kwDesc);
+
+    QFrame *kwSep = new QFrame();
+    kwSep->setFrameShape(QFrame::HLine);
+    kwSep->setStyleSheet("color: #333333;");
+    kwPageLayout->addWidget(kwSep);
+
+    QGroupBox *kwGroup = new QGroupBox(tr("关键字列表"));
     QVBoxLayout *kwLayout = new QVBoxLayout(kwGroup);
-
     QHBoxLayout *kwInputLayout = new QHBoxLayout();
     kwInputLayout->addWidget(m_keywordEdit);
     kwInputLayout->addWidget(m_addKeywordBtn);
     kwInputLayout->addWidget(m_removeKeywordBtn);
     kwLayout->addLayout(kwInputLayout);
     kwLayout->addWidget(m_keywordTable);
+    kwPageLayout->addWidget(kwGroup);
+    kwPageLayout->addStretch();
+    stack->addWidget(kwPage);
 
-    mainLayout->addWidget(kwGroup);
+    mainLayout->addWidget(stack);
 
-    // 关闭按钮
-    QHBoxLayout *closeLayout = new QHBoxLayout();
-    closeLayout->addStretch();
-    QPushButton *closeBtn = new QPushButton(tr("关闭"));
-    closeBtn->setFixedWidth(100);
-    connect(closeBtn, &QPushButton::clicked, &dialog, &QDialog::accept);
-    closeLayout->addWidget(closeBtn);
-    closeLayout->addStretch();
-    mainLayout->addLayout(closeLayout);
+    // 导航切换
+    connect(navList, &QListWidget::currentRowChanged, stack, &QStackedWidget::setCurrentIndex);
 
     dialog.exec();
 
