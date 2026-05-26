@@ -518,9 +518,9 @@ void MainWindow::setupUi()
 
     // 状态栏
     m_statusLabel1 = new QLabel(tr("串口1: 就绪"));
-    m_statusLabel1->setStyleSheet("color: #888888;");
+    m_statusLabel1->setStyleSheet("color: #BBBBBB;");
     m_statusLabel2 = new QLabel(tr("串口2: 就绪"));
-    m_statusLabel2->setStyleSheet("color: #888888;");
+    m_statusLabel2->setStyleSheet("color: #BBBBBB;");
     m_sendStatsLabel = new QLabel(tr("发送: 0/0 Bytes"));
     m_recvStatsLabel = new QLabel(tr("接收: 0/0 Bytes"));
     m_clearStatsBtn = new QPushButton(tr("清零统计"));
@@ -1946,7 +1946,7 @@ void MainWindow::updateConnectButton(int portNum, bool connected)
     } else {
         btn->setText(tr("打开连接"));
         btn->setStyleSheet("");
-        statusLabel->setStyleSheet("color: #888888;");
+        statusLabel->setStyleSheet("color: #BBBBBB;");
     }
 }
 
@@ -2045,67 +2045,28 @@ void MainWindow::showSettingsDialog()
     fontSep->setStyleSheet("color: #333333;");
     fontPageLayout->addWidget(fontSep);
 
-    // 字体族选择
-    QLabel *familyLabel = new QLabel(tr("字体"));
-    familyLabel->setStyleSheet("color: #999999; font-size: 12px;");
-    fontPageLayout->addWidget(familyLabel);
+    QLabel *fontInfoLabel = new QLabel(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
+    fontInfoLabel->setStyleSheet("font-size: 14px; padding: 8px 0;");
+    fontPageLayout->addWidget(fontInfoLabel);
 
-    QFontComboBox *fontFamilyCombo = new QFontComboBox();
-    fontFamilyCombo->setCurrentFont(QFont(m_fontFamily));
-    fontFamilyCombo->setStyleSheet(
-        "QFontComboBox { background-color: #333333; color: #D0D0D0; border: 1px solid #444444;"
-        " border-radius: 4px; padding: 6px; font-size: 13px; }"
-        "QFontComboBox:hover { border: 1px solid #555555; }"
-        "QFontComboBox QAbstractItemView { background-color: #2D2D2D; color: #D0D0D0;"
-        " border: 1px solid #444444; selection-background-color: #094771; }");
-    fontPageLayout->addWidget(fontFamilyCombo);
-
-    fontPageLayout->addSpacing(12);
-
-    // 字号选择
-    QLabel *sizeLabel = new QLabel(tr("字号"));
-    sizeLabel->setStyleSheet("color: #999999; font-size: 12px;");
-    fontPageLayout->addWidget(sizeLabel);
-
-    QSpinBox *fontSizeSpin = new QSpinBox();
-    fontSizeSpin->setRange(6, 36);
-    fontSizeSpin->setValue(m_fontSize);
-    fontSizeSpin->setFixedWidth(100);
-    fontPageLayout->addWidget(fontSizeSpin);
-
-    fontPageLayout->addSpacing(16);
-
-    // 预览
-    QLabel *previewLabel = new QLabel(tr("效果预览 AaBbCc 0123"));
-    previewLabel->setStyleSheet("font-size: 14px; padding: 12px; background-color: #252526;"
-        " border: 1px solid #333333; border-radius: 6px;");
-    previewLabel->setAlignment(Qt::AlignCenter);
-    QFont previewFont(m_fontFamily, m_fontSize);
-    previewLabel->setFont(previewFont);
-    fontPageLayout->addWidget(previewLabel);
-
-    // 实时应用
-    connect(fontFamilyCombo, &QFontComboBox::currentFontChanged, this,
-        [this, fontSizeSpin, previewLabel](const QFont &font) {
+    QPushButton *fontBtn = new QPushButton(tr("更改字体"));
+    fontBtn->setObjectName("fontBtn");
+    fontBtn->setFixedWidth(120);
+    connect(fontBtn, &QPushButton::clicked, this, [this, &fontInfoLabel]() {
+        bool ok;
+        QFont currentFont(m_fontFamily, m_fontSize);
+        QFont font = QFontDialog::getFont(&ok, currentFont, this, tr("选择字体"),
+            QFontDialog::DontUseNativeDialog);
+        if (ok) {
+            m_fontSize = font.pointSize();
             m_fontFamily = font.family();
-            m_fontSize = fontSizeSpin->value();
-            QFont preview(m_fontFamily, m_fontSize);
-            previewLabel->setFont(preview);
+            fontInfoLabel->setText(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
             applyGlobalFont();
             AppLogger::instance().info(tr("字体已更改: %1 %2号").arg(m_fontFamily).arg(m_fontSize));
             saveConfig();
-        });
-    connect(fontSizeSpin, QOverload<int>::of(&QSpinBox::valueChanged), this,
-        [this, fontFamilyCombo, previewLabel](int size) {
-            m_fontSize = size;
-            m_fontFamily = fontFamilyCombo->currentFont().family();
-            QFont preview(m_fontFamily, m_fontSize);
-            previewLabel->setFont(preview);
-            applyGlobalFont();
-            AppLogger::instance().info(tr("字体已更改: %1 %2号").arg(m_fontFamily).arg(m_fontSize));
-            saveConfig();
-        });
-
+        }
+    });
+    fontPageLayout->addWidget(fontBtn);
     fontPageLayout->addStretch();
     stack->addWidget(fontPage);
 
