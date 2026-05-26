@@ -2045,12 +2045,13 @@ void MainWindow::showSettingsDialog()
     fontSep->setStyleSheet("color: #333333;");
     fontPageLayout->addWidget(fontSep);
 
-    QGroupBox *fontGroup = new QGroupBox(tr("字体"));
-    QFormLayout *fontLayout = new QFormLayout(fontGroup);
     QLabel *fontInfoLabel = new QLabel(tr("%1  %2号").arg(m_fontFamily).arg(m_fontSize));
-    fontInfoLabel->setStyleSheet("font-size: 14px;");
-    QPushButton *fontBtn = new QPushButton(tr("选择字体"));
+    fontInfoLabel->setStyleSheet("font-size: 14px; padding: 8px 0;");
+    fontPageLayout->addWidget(fontInfoLabel);
+
+    QPushButton *fontBtn = new QPushButton(tr("更改字体"));
     fontBtn->setObjectName("fontBtn");
+    fontBtn->setFixedWidth(120);
     connect(fontBtn, &QPushButton::clicked, this, [this, &fontInfoLabel]() {
         bool ok;
         QFont currentFont(m_fontFamily, m_fontSize);
@@ -2065,9 +2066,7 @@ void MainWindow::showSettingsDialog()
             saveConfig();
         }
     });
-    fontLayout->addRow(tr("当前字体:"), fontInfoLabel);
-    fontLayout->addRow(tr("操作:"), fontBtn);
-    fontPageLayout->addWidget(fontGroup);
+    fontPageLayout->addWidget(fontBtn);
     fontPageLayout->addStretch();
     stack->addWidget(fontPage);
 
@@ -2091,15 +2090,12 @@ void MainWindow::showSettingsDialog()
     kwSep->setStyleSheet("color: #333333;");
     kwPageLayout->addWidget(kwSep);
 
-    QGroupBox *kwGroup = new QGroupBox(tr("关键字列表"));
-    QVBoxLayout *kwLayout = new QVBoxLayout(kwGroup);
     QHBoxLayout *kwInputLayout = new QHBoxLayout();
     kwInputLayout->addWidget(m_keywordEdit);
     kwInputLayout->addWidget(m_addKeywordBtn);
     kwInputLayout->addWidget(m_removeKeywordBtn);
-    kwLayout->addLayout(kwInputLayout);
-    kwLayout->addWidget(m_keywordTable);
-    kwPageLayout->addWidget(kwGroup);
+    kwPageLayout->addLayout(kwInputLayout);
+    kwPageLayout->addWidget(m_keywordTable);
     kwPageLayout->addStretch();
     stack->addWidget(kwPage);
 
